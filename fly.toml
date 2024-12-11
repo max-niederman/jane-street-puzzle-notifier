@@ -1,0 +1,21 @@
+# fly.toml app configuration file generated for jane-street-puzzle-notifier on 2024-12-11T02:38:36-08:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'jane-street-puzzle-notifier'
+primary_region = 'sea'
+
+[build]
+
+[env]
+  PERSIST_PATH = "/persist/persist.json"
+
+[[mounts]]
+  source = "persist"
+  destination = "/persist"
+
+[[vm]]
+  memory = '256mb'
+  cpu_kind = 'shared'
+  cpus = 1

@@ -8,11 +8,11 @@ export class Persist {
   path: string;
 
   constructor() {
-    if (!process.env.STATE_PATH) {
-      throw new Error("STATE_PATH must be set");
+    if (!process.env.PERSIST_PATH) {
+      throw new Error("PERSIST_PATH must be set");
     }
 
-    this.path = process.env.STATE_PATH;
+    this.path = process.env.PERSIST_PATH;
   }
 
   async load() {

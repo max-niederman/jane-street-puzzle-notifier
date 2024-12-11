@@ -60,7 +60,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 });
 
 console.log("Performing initial scrape...");
-let results = { name: "", leaderboard: [] };
+let results = await scrape();
 console.log("Initial scrape completed with results: ", results);
 
 async function scrapeAndNotify() {
