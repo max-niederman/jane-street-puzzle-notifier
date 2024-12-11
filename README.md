@@ -1,15 +1,4 @@
-# jane-street-puzzle-notifier
+# Jane Street Puzzle Notifier
 
-To install dependencies:
-
-```bash
-bun install
-```
-
-To run:
-
-```bash
-bun run bot.ts
-```
-
-This project was created using `bun init` in bun v1.1.29. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+Sends Discord notifications when new [Jane Street's puzzles](https://www.janestreet.com/puzzles/) are posted
+or the current puzzle's leaderboard changes.
