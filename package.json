@@ -1,6 +1,6 @@
 {
   "name": "jane-street-puzzle-notifier",
-  "module": "bot.ts",
+  "module": "src/index.ts",
   "type": "module",
   "devDependencies": {
     "@types/bun": "latest"
@@ -10,5 +10,9 @@
   },
   "dependencies": {
     "discord.js": "^14.16.3"
+  },
+  "scripts": {
+    "bot": "bun run src/index.ts",
+    "deploy-commands": "bun run src/deploy-commands.ts"
   }
 }
