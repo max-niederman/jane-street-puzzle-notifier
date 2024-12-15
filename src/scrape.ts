@@ -1,33 +1,45 @@
 import * as cheerio from "cheerio";
+import * as difflib from "difflib";
 
 export type Results = {
   name: string;
   leaderboard: string[];
+  time: Date;
 };
 
 export type ResultsDiff = {
-  nameChanged: boolean;
+  name: {
+    changed: boolean;
+  };
   leaderboard: {
-    added: string[];
-    removed: string[];
+    changed: boolean;
+    description: string;
   };
 };
 
-export function diffResults(from: Results, to: Results) {
+export function diffResults(from: Results, to: Results): ResultsDiff {
   const nameChanged = from.name !== to.name;
 
-  const added = to.leaderboard.filter(
-    (name) => !from.leaderboard.includes(name)
-  );
-  const removed = from.leaderboard.filter(
-    (name) => !to.leaderboard.includes(name)
-  );
+  const leaderboardChanged =
+    from.leaderboard.join("\n") !== to.leaderboard.join("\n");
+  const leaderboardDescription = difflib
+    .unifiedDiff(
+      from.leaderboard,
+      to.leaderboard,
+      {
+        fromfile: "leaderboard.txt",
+        fromfiledate: from.time.toISOString(),
+        tofile: "leaderboard.txt",
+        tofiledate: to.time.toISOString(),
+      }
+    )
+    .join("\n");
 
   return {
-    nameChanged,
+    name: { changed: nameChanged },
     leaderboard: {
-      added,
-      removed,
+      changed: leaderboardChanged,
+      description: leaderboardDescription,
     },
   };
 }
@@ -65,5 +77,6 @@ export async function scrape(): Promise<Results> {
   return {
     name,
     leaderboard: leaderboardJSON.leaders,
+    time: new Date(),
   };
 }

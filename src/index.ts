@@ -1,6 +1,6 @@
 import { Client, Events, GatewayIntentBits, TextChannel } from "discord.js";
 import { Persist, type SubscriptionType } from "./persist";
-import { diffResults, scrape } from "./scrape";
+import { diffResults, scrape, type Results } from "./scrape";
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 const persist = new Persist();
@@ -60,7 +60,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
 });
 
 console.log("Performing initial scrape...");
-let results = await scrape();
+let results: Results = process.env.DEBUG
+  ? { name: "", leaderboard: [], time: new Date() }
+  : await scrape();
 console.log("Initial scrape completed with results: ", results);
 
 async function scrapeAndNotify() {
@@ -69,7 +71,7 @@ async function scrapeAndNotify() {
   console.log("Scrape completed with results: ", newResults);
 
   const diff = diffResults(results, newResults);
-  if (diff.nameChanged) {
+  if (diff.name.changed) {
     console.log("Puzzle name changed!");
     for (const [channelID, subscriptions] of Object.entries(
       persist.subscriptions
@@ -78,54 +80,58 @@ async function scrapeAndNotify() {
 
       if (subscriptions.includes("puzzle")) {
         await channel.send(
-          `🧩 [The puzzle](<https://www.janestreet.com/puzzles/current-puzzle/>) name has changed! It's now: ${newResults.name}`
+          `# Puzzle Name Changed To "${newResults.name}"
+[The puzzle](<https://www.janestreet.com/puzzles/current-puzzle/>) name has changed! It's now "${newResults.name}"`
         );
       }
     }
   }
 
-  if (diff.leaderboard.added.length || diff.leaderboard.removed.length) {
+  if (diff.leaderboard.changed) {
     console.log("Leaderboard changed!");
+
+    const leaderboardFile = Buffer.from(newResults.leaderboard.join("\n"));
+
+    const message =
+      diff.leaderboard.description.length > 2000
+        ? {
+            content: `# Leaderboard Changed
+The leaderboard has changed! The diff is too long to display here, but it's attached.`,
+            files: [
+              {
+                name: "leaderboard.diff",
+                title: "Diff",
+                contentType: "text/x-diff",
+                attachment: Buffer.from(diff.leaderboard.description),
+              },
+              {
+                name: "leaderboard.txt",
+                title: "New Leaderboard",
+                attachment: leaderboardFile,
+              },
+            ],
+          }
+        : {
+            content: `# Leaderboard Changed
+\`\`\`diff
+${diff.leaderboard.description}
+\`\`\``,
+            files: [
+              {
+                name: "leaderboard.txt",
+                description: "New leaderboard",
+                attachment: leaderboardFile,
+              },
+            ],
+          };
+
     for (const [channelID, subscriptions] of Object.entries(
       persist.subscriptions
     )) {
       const channel: TextChannel = await client.channels.fetch(channelID);
 
       if (subscriptions.includes("leaderboard")) {
-        const files = [
-          {
-            name: "leaderboard.txt",
-            description: "New leaderboard",
-            attachment: Buffer.from(newResults.leaderboard.join("\n")),
-          },
-        ];
-
-        const added = diff.leaderboard.added
-          .map((name) => `+ ${name}`)
-          .join("\n");
-        const removed = diff.leaderboard.removed
-          .map((name) => `\\- ${name}`)
-          .join("\n");
-
-        if (added.length + removed.length > 1000) {
-          files.push({
-            name: "diff.txt",
-            description: "Difference between the old and new leaderboards",
-            attachment: Buffer.from(`${added}\n${removed}`),
-          });
-
-          await channel.send({
-            content:
-              "📈 The leaderboard has changed! There are too many changes to summarize here, but a diff is attached.",
-            files,
-          });
-          continue;
-        }
-
-        await channel.send({
-          content: `📈 Leaderboard changes:\n${added}\n${removed}`,
-          files,
-        });
+        await channel.send(message);
       }
     }
   }
