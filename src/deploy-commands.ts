@@ -4,44 +4,34 @@ const commands = [
   new SlashCommandBuilder()
     .setName("subscribe")
     .setDescription("Subscribe to updates about Jane Street's puzzles")
-    .addSubcommand((subcommand) =>
-      subcommand
-        .setName("puzzle")
-        .setDescription("Subscribe to new puzzle updates")
-        .addChannelOption((option) =>
-          option
-            .setName("channel")
-            .setDescription("The channel to send updates to")
+    .addStringOption((option) =>
+      option
+        .setName("type")
+        .setDescription("The type of updates to subscribe to")
+        .setRequired(true)
+        .setChoices(
+          { name: "leaderboard", value: "leaderboard" },
+          { name: "puzzle", value: "puzzle" }
         )
     )
-    .addSubcommand((subcommand) =>
-      subcommand
-        .setName("leaderboard")
-        .setDescription("Subscribe to leaderboard updates")
-        .addChannelOption((option) =>
-          option
-            .setName("channel")
-            .setDescription("The channel to send updates to")
-        )
+    .addChannelOption((option) =>
+      option.setName("channel").setDescription("The channel to subscribe")
     ),
   new SlashCommandBuilder()
     .setName("unsubscribe")
     .setDescription("Unsubscribe from updates about Jane Street's puzzles")
-    .addSubcommand((subcommand) =>
-      subcommand
-        .setName("puzzle")
-        .setDescription("Unsubscribe from new puzzle updates")
-        .addChannelOption((option) =>
-          option.setName("channel").setDescription("The channel to unsubscribe")
+    .addStringOption((option) =>
+      option
+        .setName("type")
+        .setDescription("The type of updates to unsubscribe from")
+        .setRequired(true)
+        .setChoices(
+          { name: "leaderboard", value: "leaderboard" },
+          { name: "puzzle", value: "puzzle" }
         )
     )
-    .addSubcommand((subcommand) =>
-      subcommand
-        .setName("leaderboard")
-        .setDescription("Unsubscribe from leaderboard updates")
-        .addChannelOption((option) =>
-          option.setName("channel").setDescription("The channel to unsubscribe")
-        )
+    .addChannelOption((option) =>
+      option.setName("channel").setDescription("The channel to unsubscribe")
     ),
 ];
 

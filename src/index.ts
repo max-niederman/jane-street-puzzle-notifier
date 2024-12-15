@@ -26,7 +26,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 
   const subType: SubscriptionType | unknown =
-    interaction.options.getSubcommand();
+    interaction.options.getString("type");
   if (subType !== "puzzle" && subType !== "leaderboard") {
     await interaction.reply("Sorry, I don't recognize that subscription type.");
     return;
